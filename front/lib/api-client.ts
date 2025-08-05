@@ -110,7 +110,7 @@ class ApiClient {
       }
 
       // Для скачивания файлов возвращаем Response
-      if (endpoint.includes("/download/")) {
+      if (/^\/download\/[^/]+$/.test(endpoint)) {
         return response as unknown as T
       }
 
