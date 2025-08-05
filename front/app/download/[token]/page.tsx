@@ -96,7 +96,7 @@ export default function DownloadPage() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = filename || fileInfo.filename
+      a.download = fileInfo.filename
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)

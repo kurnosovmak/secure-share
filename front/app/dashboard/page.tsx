@@ -228,7 +228,7 @@ export default function Dashboard() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         {getStatusBadge(link.status)}
-                        <span className="text-sm text-slate-500">Создано {formatDate(link.createdAt)}</span>
+                        <span className="text-sm text-slate-500">Создано {formatDate(link.created_at)}</span>
                       </div>
                       {link.fileName && (
                         <div className="flex items-center space-x-2 text-sm text-slate-700">
