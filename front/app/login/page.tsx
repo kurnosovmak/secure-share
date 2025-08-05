@@ -116,7 +116,6 @@ export default function LoginPage() {
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
-
                 <div>
                       <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 mt-6" disabled={isLoading}>
                       {isLoading ? "Вход..." : "Войти"}
@@ -124,11 +123,11 @@ export default function LoginPage() {
                 </div>
               </form>
 
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-800 font-medium mb-2">Демо-данные для входа:</p>
-                <p className="text-sm text-blue-700">Email: admin@example.com</p>
-                <p className="text-sm text-blue-700">Пароль: password</p>
-              </div>
+              {/*<div className="mt-6 p-4 bg-blue-50 rounded-lg">*/}
+              {/*  <p className="text-sm text-blue-800 font-medium mb-2">Демо-данные для входа:</p>*/}
+              {/*  <p className="text-sm text-blue-700">Email: admin@example.com</p>*/}
+              {/*  <p className="text-sm text-blue-700">Пароль: password</p>*/}
+              {/*</div>*/}
             </CardContent>
           </Card>
 
