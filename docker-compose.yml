@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  # Frontend сервис (Next.js)
+  frontend:
+    container_name: secure-share-frontend
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    ports:
+      - "3001:3000"
+    networks:
+      - secure-share-network
+
+networks:
+  secure-share-network:
+    driver: bridge

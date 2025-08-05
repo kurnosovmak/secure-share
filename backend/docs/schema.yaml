@@ -1,0 +1,229 @@
+openapi: 3.0.3
+info:
+  title: One-Time File Transfer API
+  version: 1.0.0
+  description: API для безопасной одноразовой загрузки и скачивания файлов
+
+servers:
+  - url: https://api.example.com
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UploadLink:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "abc123"
+        upload_url:
+          type: string
+          example: "https://api.example.com/upload/abc123"
+        status:
+          type: string
+          enum: [ waiting_for_upload, uploaded, expired, downloaded ]
+        created_at:
+          type: string
+          format: date-time
+    DownloadFileInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "abc123"
+        status:
+          type: string
+          enum: [ waiting_for_upload, uploaded, expired, downloaded ]
+        created_at:
+          type: string
+          format: date-time
+        expired_at:
+          type: string
+          format: date-time
+        filename:
+          type: string
+          example: "document.pdf"
+          description: "Оригинальное имя загруженного файла"
+        file_size:
+          type: integer
+          format: int64
+          example: 1048576
+          description: "Размер файла в байтах"
+        mime_type:
+          type: string
+          example: "application/pdf"
+          description: "MIME-тип файла"
+    UploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+    DownloadResponse:
+      type: string
+      format: binary
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      summary: Аутентификация пользователя
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: mySecret123
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: Неверный email или пароль
+  /upload-links:
+    post:
+      summary: Сгенерировать одноразовую ссылку для загрузки
+      tags: [Upload Links]
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Ссылка успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadLink'
+    get:
+          summary: Получить список ссылок
+          tags: [Get Upload Links]
+          security:
+            - bearerAuth: []
+          responses:
+            '200':
+              description: Список ссылок успешно получен
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UploadLink'
+
+  /upload/{link_id}:
+    post:
+      summary: Загрузить файл по одноразовой ссылке
+      tags: [Upload]
+      parameters:
+        - in: path
+          name: link_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Файл успешно загружен
+        '400':
+          description: Недействительная или просроченная ссылка
+        '409':
+          description: Файл уже загружен
+
+  /download/{link_id}:
+    get:
+      summary: Скачать файл по одноразовой ссылке
+      tags: [ Download ]
+      parameters:
+        - in: path
+          name: link_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Файл готов к скачиванию
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/DownloadResponse'
+        '410':
+          description: Ссылка уже использована или файл не найден
+        '404':
+          description: Ссылка не найдена
+
+  /download/{link_id}/info:
+    get:
+      summary: Получить информацию по файлу
+      tags: [ Download ]
+      parameters:
+        - in: path
+          name: link_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Информация по файлу
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadFileInfo'
+        '401':
+          description: Файл еще не загружен
+        '410':
+          description: Срок действия ссылки истек
+        '404':
+          description: Ссылка не найдена или файл не существует
+
+  /upload-links/{link_id}/status:
+    get:
+      summary: Получить статус одноразовой ссылки
+      tags: [Upload Links]
+      parameters:
+        - in: path
+          name: link_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Текущий статус ссылки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadLink'
+        '404':
+          description: Ссылка не найдена
